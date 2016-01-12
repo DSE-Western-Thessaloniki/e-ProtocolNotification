@@ -6,7 +6,9 @@
 #include <QNetworkReply>
 #include <QSettings>
 #include <QTimer>
+#include <QResource>
 #include "popup.h"
+#include "version.h"
 
 namespace Ui {
 class EPN_Dialog;
@@ -20,10 +22,13 @@ public:
     explicit EPN_Dialog(QWidget *parent = 0);
     ~EPN_Dialog();
 
-private slots:
-    void on_horizontalSlider_valueChanged(int value);
-    void replyFinished(QNetworkReply*);
+public slots:
     void getUpdate(void);
+
+private slots:
+    void replyFinished(QNetworkReply*);
+    void saveSettings(void);
+    void quit(void);
 
 private:
     Ui::EPN_Dialog *ui;
@@ -34,6 +39,8 @@ private:
     QSettings *settings;
     QString username;
     QTimer *timer;
+    QAction *openAction, *exitAction;
+    QResource resource;
 };
 
 #endif // EPN_DIALOG_H

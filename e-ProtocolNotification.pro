@@ -18,7 +18,13 @@ SOURCES += main.cpp\
     popup.cpp
 
 HEADERS  += epn_dialog.h \
-    popup.h
+    popup.h \
+    version.h
 
 FORMS    += epn_dialog.ui \
     popup.ui
+
+DISTFILES +=
+
+RESOURCES += \
+    epnresources.qrc

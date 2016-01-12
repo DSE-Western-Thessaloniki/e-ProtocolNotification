@@ -13,18 +13,19 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     ui(new Ui::EPN_Dialog)
 {
     ui->setupUi(this);
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon();
+
+    connect(this, SIGNAL(accepted()), this, SLOT(saveSettings()));
+    setWindowTitle(QString("e-protocol notification v")+VERSION);
+
+    // Create a tray icon
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon(":/icons/epn-icon.png"));
     QMenu *trayMenu = new QMenu();
-    QAction *openAction, *exitAction;
-    QPixmap p(16,16);
 
-    p.fill(Qt::blue);
-    QIcon myicon(p);
-
-    openAction = trayMenu->addAction("Άνοιγμα");
+    openAction = trayMenu->addAction("Ρυθμίσεις");
     trayMenu->addSeparator();
-    exitAction = trayMenu->addAction("Έξοδος", this, SLOT(reject()));
-    trayIcon->setIcon(myicon);
+    exitAction = trayMenu->addAction("Έξοδος");
+    connect(openAction, SIGNAL(triggered(bool)), this, SLOT(show()));
+    connect(exitAction, SIGNAL(triggered(bool)), this, SLOT(quit()));
 
     trayIcon->setContextMenu(trayMenu);
     trayIcon->show();
@@ -44,12 +45,13 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
 
 EPN_Dialog::~EPN_Dialog()
 {
-    delete ui;
-}
+    settings->setValue("url", url);
+    timer->stop();
 
-void EPN_Dialog::on_horizontalSlider_valueChanged(int value)
-{
-    ui->minEdit->setText(QString::number(value));
+    delete ui;
+    delete popup;
+    delete settings;
+    delete timer;
 }
 
 void EPN_Dialog::replyFinished(QNetworkReply *reply)
@@ -66,12 +68,33 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         // Έλεγχος τιμών
         val = jobj.value("message");
         if (val != QJsonValue::Undefined) { // Αν υπάρχει μήνυμα
+            // TODO: Έλεγχος αν είναι σημαντικό μήνυμα, αν όχι εμφάνισε 1 στις 4
             popup->showPopup("Message", val.toString());
         }
+        val = jobj.value("timeout");
+        timeout = val.toInt(30);
+        val = jobj.value("url");
+        if (val != QJsonValue::Undefined) // Αν υπάρχει νέα ρύθμιση για το url
+            url = QUrl(val.toString());
     }
 }
 
 void EPN_Dialog::getUpdate()
 {
-    networkManager->get(QNetworkRequest(QUrl(url)));
+    if (username.isEmpty()) {
+        show();
+    }
+    else
+        networkManager->get(QNetworkRequest(QUrl(url)));
+}
+
+void EPN_Dialog::saveSettings(void)
+{
+    username = ui->usernameEdit->text();
+    settings->setValue("username", username);
+    hide();
+}
+
+void EPN_Dialog::quit(void) {
+    QApplication::quit();
 }
