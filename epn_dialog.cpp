@@ -1,5 +1,9 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <QJsonValue>
 
 #include "epn_dialog.h"
 #include "ui_epn_dialog.h"
@@ -29,7 +33,13 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     connect(networkManager, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(replyFinished(QNetworkReply*)));
     
-    
+    popup = new Popup(this);
+    settings = new QSettings("epn.ini", QSettings::IniFormat);
+    username = settings->value("username").toString();
+    url = settings->value("url").toUrl();
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(getUpdate()));
 }
 
 EPN_Dialog::~EPN_Dialog()
@@ -56,7 +66,12 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         // Έλεγχος τιμών
         val = jobj.value("message");
         if (val != QJsonValue::Undefined) { // Αν υπάρχει μήνυμα
-            showPopup("Message", val.toString());
+            popup->showPopup("Message", val.toString());
         }
     }
+}
+
+void EPN_Dialog::getUpdate()
+{
+    networkManager->get(QNetworkRequest(QUrl(url)));
 }

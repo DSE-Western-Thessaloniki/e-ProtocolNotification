@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QSettings>
+#include <QTimer>
 #include "popup.h"
 
 namespace Ui {
@@ -21,12 +23,17 @@ public:
 private slots:
     void on_horizontalSlider_valueChanged(int value);
     void replyFinished(QNetworkReply*);
+    void getUpdate(void);
 
 private:
     Ui::EPN_Dialog *ui;
     QNetworkAccessManager *networkManager;
     Popup *popup;
-
+    int timeout;
+    QUrl url;
+    QSettings *settings;
+    QString username;
+    QTimer *timer;
 };
 
 #endif // EPN_DIALOG_H
