@@ -1,4 +1,3 @@
-#include <QSystemTrayIcon>
 #include <QMenu>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -18,7 +17,8 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     setWindowTitle(QString("e-protocol notification v")+VERSION);
 
     // Create a tray icon
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon(":/icons/epn-icon.png"));
+    trayIcon = new QSystemTrayIcon(QIcon(":/icons/epn-icon.png"));
+    trayIcon->setToolTip(QString("e-Protocol Notification"));
     QMenu *trayMenu = new QMenu();
 
     openAction = trayMenu->addAction("Ρυθμίσεις");
@@ -30,7 +30,7 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     trayIcon->setContextMenu(trayMenu);
     trayIcon->show();
     
-    QNetworkAccessManager *networkManager = new QNetworkAccessManager(this);
+    networkManager = new QNetworkAccessManager(this);
     connect(networkManager, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(replyFinished(QNetworkReply*)));
     
@@ -41,6 +41,9 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(getUpdate()));
+
+    dontshowagain = false;
+    lowPriorityMsg = 0;
 }
 
 EPN_Dialog::~EPN_Dialog()
@@ -63,19 +66,32 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
 
     jdoc.fromJson(reply->readAll(), &jerr);
     if (jerr.error == QJsonParseError::NoError) {
+        dontshowagain = false;
         jobj = jdoc.object();
 
         // Έλεγχος τιμών
         val = jobj.value("message");
         if (val != QJsonValue::Undefined) { // Αν υπάρχει μήνυμα
-            // TODO: Έλεγχος αν είναι σημαντικό μήνυμα, αν όχι εμφάνισε 1 στις 4
-            popup->showPopup("Message", val.toString());
+            if (jobj.value("priority").toString() == "low") { // low priority
+                lowPriorityMsg = (lowPriorityMsg + 1) % 4;
+                if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
+                    popup->showPopup("Message", val.toString());
+            }
+            else
+                popup->showPopup("Message", val.toString());
         }
         val = jobj.value("timeout");
         timeout = val.toInt(30);
-        val = jobj.value("url");
-        if (val != QJsonValue::Undefined) // Αν υπάρχει νέα ρύθμιση για το url
-            url = QUrl(val.toString());
+        url = jobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
+        version = jobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
+        trayIcon->setIcon(QIcon(":/icons/epn-icon.png"));
+    }
+    else {
+        if (!dontshowagain) {
+            popup->showPopup("Σφάλμα!","Πρόβλημα σύνδεσης με το διακομιστή.");
+            trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
+        }
+        dontshowagain = true;
     }
 }
 

@@ -2,6 +2,7 @@
 #define EPN_DIALOG_H
 
 #include <QDialog>
+#include <QSystemTrayIcon>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QSettings>
@@ -37,10 +38,13 @@ private:
     int timeout;
     QUrl url;
     QSettings *settings;
-    QString username;
+    QString username, version;
     QTimer *timer;
     QAction *openAction, *exitAction;
     QResource resource;
+    bool dontshowagain;
+    int lowPriorityMsg;
+    QSystemTrayIcon *trayIcon;
 };
 
 #endif // EPN_DIALOG_H
