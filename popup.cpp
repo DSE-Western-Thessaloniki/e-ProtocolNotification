@@ -1,3 +1,5 @@
+#include <QJsonDocument>
+
 #include "popup.h"
 #include "ui_popup.h"
 

@@ -38,28 +38,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QSlider" name="horizontalSlider">
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>30</number>
-     </property>
-     <property name="singleStep">
-      <number>5</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="tickPosition">
-      <enum>QSlider::TicksAbove</enum>
-     </property>
-     <property name="tickInterval">
-      <number>5</number>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLineEdit" name="minEdit">
@@ -103,7 +81,6 @@
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>usernameEdit</tabstop>
-  <tabstop>horizontalSlider</tabstop>
   <tabstop>minEdit</tabstop>
   <tabstop>okButton</tabstop>
   <tabstop>cancelButton</tabstop>
