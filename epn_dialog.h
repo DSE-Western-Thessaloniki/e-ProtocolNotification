@@ -8,8 +8,10 @@
 #include <QSettings>
 #include <QTimer>
 #include <QResource>
+#include <QJsonArray>
 #include "popup.h"
 #include "version.h"
+#include "filedownloader.h"
 
 namespace Ui {
 class EPN_Dialog;
@@ -51,6 +53,8 @@ private:
     bool dontshowagain;
     int lowPriorityMsg;
     QSystemTrayIcon *trayIcon;
+    QList<FileDownloader*> downloadList;
+    QJsonArray filelist;
 };
 
 #endif // EPN_DIALOG_H

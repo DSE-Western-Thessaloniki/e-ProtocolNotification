@@ -83,9 +83,21 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         val = jobj.value("timeout");
         timeout = val.toInt(30);
         url = jobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
-        version = jobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
-        if (compareVersions(QString(VERSION),version)>0) {
-            // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
+        val = jobj.value("version");
+        if (val != QJsonValue::Undefined) {
+            version = jobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
+            if (compareVersions(QString(VERSION),version)>0) {
+                // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
+                val = jobj.value("filelist");
+                if (val != QJsonValue::Undefined) {
+                    filelist = jobj.value("filelist").toArray();
+                    for (int i=0; i<filelist.size(); i++) {
+                        QJsonArray file = filelist[0].toArray();
+                        downloadList << new FileDownloader(QUrl(url.toString() + QString("/download/") + file[0].toString()), file[1].toString(), file[2].toInt());
+                    }
+                }
+
+            }
         }
         trayIcon->setIcon(QIcon(":/icons/epn-icon.png"));
     }
