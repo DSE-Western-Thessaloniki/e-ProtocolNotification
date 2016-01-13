@@ -114,3 +114,11 @@ void EPN_Dialog::saveSettings(void)
 void EPN_Dialog::quit(void) {
     QApplication::quit();
 }
+
+void EPN_Dialog::closeEvent(QCloseEvent *event)
+{
+    if (trayIcon->isVisible()) {
+        hide();
+        event->ignore();
+    }
+}

@@ -23,6 +23,9 @@ public:
     explicit EPN_Dialog(QWidget *parent = 0);
     ~EPN_Dialog();
 
+protected:
+    void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
+
 public slots:
     void getUpdate(void);
 
