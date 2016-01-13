@@ -1,7 +1,8 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VERSION "0.1-alpha1"
+// Watch out! Use only numbers and keep the format x.y.z
+#define VERSION "0.1.0"
 
 #endif // VERSION_H
 

@@ -84,6 +84,9 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         timeout = val.toInt(30);
         url = jobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
         version = jobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
+        if (compareVersions(QString(VERSION),version)>0) {
+            // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
+        }
         trayIcon->setIcon(QIcon(":/icons/epn-icon.png"));
     }
     else {
@@ -120,5 +123,30 @@ void EPN_Dialog::closeEvent(QCloseEvent *event)
     if (trayIcon->isVisible()) {
         hide();
         event->ignore();
+    }
+}
+
+int EPN_Dialog::compareVersions(QString ver1, QString ver2)
+{
+    // Οι εκδόσεις είναι πάντα της μορφής x.y.z
+    QStringList listver1 = ver1.split(".");
+    QStringList listver2 = ver2.split(".");
+
+    if (listver1.at(0).toInt()>listver2.at(0).toInt())
+        return -1;
+    else if (listver1.at(0).toInt()<listver2.at(0).toInt())
+        return 1;
+    else {
+        if (listver1.at(1).toInt()>listver2.at(1).toInt())
+            return -1;
+        else if (listver1.at(1).toInt()<listver2.at(1).toInt())
+            return 1;
+        else {
+            if (listver1.at(2).toInt()>listver2.at(2).toInt())
+                return -1;
+            else if (listver1.at(2).toInt()<listver2.at(2).toInt())
+                return 1;
+            return 0;
+        }
     }
 }

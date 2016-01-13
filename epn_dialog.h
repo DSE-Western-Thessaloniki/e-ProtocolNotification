@@ -35,6 +35,9 @@ private slots:
     void quit(void);
 
 private:
+    int compareVersions(QString, QString);
+
+private:
     Ui::EPN_Dialog *ui;
     QNetworkAccessManager *networkManager;
     Popup *popup;
