@@ -16,12 +16,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         epn_dialog.cpp \
     popup.cpp \
-    filedownloader.cpp
+    filedownloader.cpp \
+    logger.cpp
 
 HEADERS  += epn_dialog.h \
     popup.h \
     version.h \
-    filedownloader.h
+    filedownloader.h \
+    logger.h
 
 FORMS    += epn_dialog.ui \
     popup.ui
