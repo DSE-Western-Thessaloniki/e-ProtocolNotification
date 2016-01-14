@@ -12,21 +12,27 @@ class FileDownloader : public QObject
 {
  Q_OBJECT
  public:
-  explicit FileDownloader(QUrl fileUrl, QString hash, int algorithm, QObject *parent = 0);
+  explicit FileDownloader(QObject *parent = 0);
   virtual ~FileDownloader();
-  QByteArray downloadedData() const;
+  QMap<int, QByteArray> downloadedData() const;
+  void getFiles(QVariantList filelist, QUrl baseUrl);
 
  signals:
   void downloaded();
 
  private slots:
-  void fileDownloaded(QNetworkReply* pReply);
+  void fileDownloaded(QNetworkReply* reply);
 
  private:
   QString hash;
   int algorithm;
-  QNetworkAccessManager m_WebCtrl;
-  QByteArray m_DownloadedData;
+  QNetworkAccessManager netManager;
+  QMap<int,QByteArray> downloadedDataMap;
+  QStringList filenameList;
+  QStringList hashList;
+  QList<int> hashTypeList;
+  QList<QUrl> urlList;
+  int remainingRequests;
 };
 
 #endif // FILEDOWNLOADER_H

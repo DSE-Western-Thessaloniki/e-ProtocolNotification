@@ -39,14 +39,23 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     
     popup = new Popup(this);
     settings = new QSettings("epn.ini", QSettings::IniFormat);
-    username = settings->value("username").toString();
+    username = settings->value("username", "").toString();
+    ui->usernameEdit->setText(username);
     url = settings->value("url", "").toUrl();
 
     timer = new QTimer(this);
+    timer->start(120000);
+    ui->minEdit->setText(QString::number(2));
     connect(timer, SIGNAL(timeout()), this, SLOT(getUpdate()));
 
     dontshowagain = false;
     lowPriorityMsg = 0;
+
+    qDebug() << "Support SSL:  " << QSslSocket::supportsSsl()
+            << "\nLib Version Number: " << QSslSocket::sslLibraryVersionNumber()
+            << "\nLib Version String: " << QSslSocket::sslLibraryVersionString()
+            << "\nLib Build Version Number: " << QSslSocket::sslLibraryBuildVersionNumber()
+            << "\nLib Build Version String: " << QSslSocket::sslLibraryBuildVersionString();
 }
 
 EPN_Dialog::~EPN_Dialog()
@@ -67,44 +76,57 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
     QJsonObject jobj;
     QJsonValue val;
 
-    jdoc.fromJson(reply->readAll(), &jerr);
-    if (jerr.error == QJsonParseError::NoError) {
-        dontshowagain = false;
-        jobj = jdoc.object();
+    if (reply->error() == QNetworkReply::NoError) {
+        jdoc.fromJson(reply->readAll(), &jerr);
+        if (jerr.error == QJsonParseError::NoError) {
+            dontshowagain = false;
+            jobj = jdoc.object();
 
-        // Έλεγχος τιμών
-        val = jobj.value("message");
-        if (val != QJsonValue::Undefined) { // Αν υπάρχει μήνυμα
-            if (jobj.value("priority").toString() == "low") { // low priority
-                lowPriorityMsg = (lowPriorityMsg + 1) % 4;
-                if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
+            // Έλεγχος τιμών
+            val = jobj.value("message");
+            if (val != QJsonValue::Undefined) { // Αν υπάρχει μήνυμα
+                if (jobj.value("priority").toString() == "low") { // low priority
+                    lowPriorityMsg = (lowPriorityMsg + 1) % 4;
+                    if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
+                        popup->showPopup("Message", val.toString());
+                }
+                else
                     popup->showPopup("Message", val.toString());
             }
-            else
-                popup->showPopup("Message", val.toString());
-        }
-        val = jobj.value("timeout");
-        timeout = val.toInt(30);
-        url = jobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
-        val = jobj.value("version");
-        if (val != QJsonValue::Undefined) {
-            version = jobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
-            if (compareVersions(QString(VERSION),version)>0) {
-                // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
-                val = jobj.value("filelist");
-                if (val != QJsonValue::Undefined) {
-                    filelist = jobj.value("filelist").toArray();
-                    for (int i=0; i<filelist.size(); i++) {
-                        QJsonArray file = filelist[0].toArray();
-                        downloadList << new FileDownloader(QUrl(url.toString() + QString("/download/") + file[0].toString()), file[1].toString(), file[2].toInt());
+            val = jobj.value("timeout");
+            timeout = val.toInt(30*60*1000); // Default: 30min
+            if (timeout > 60000) // Just in case...
+                timer->setInterval(timeout);
+            ui->minEdit->setText(QString::number(timeout));
+            url = jobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
+            settings->setValue("url",url);
+            val = jobj.value("version");
+            if (val != QJsonValue::Undefined) {
+                version = jobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
+                if (compareVersions(QString(VERSION),version)>0) {
+                    // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
+                    val = jobj.value("filelist");
+                    if (val != QJsonValue::Undefined) {
+                        fileDownloader.getFiles(jobj.value("filelist").toArray().toVariantList(), QUrl(url.toString() + QString("/download/")));
+                        //filelist = jobj.value("filelist").toArray();
+                        //for (int i=0; i<filelist.size(); i++) {
+                            //QJsonArray file = filelist[0].toArray();
+                            //downloadList << new FileDownloader(QUrl(url.toString() + QString("/download/") + file[0].toString()), file[1].toString(), file[2].toInt());
                     }
                 }
-
             }
         }
-        trayIcon->setIcon(QIcon(":/icons/epn-icon.png"));
+        else {
+            qDebug() << "Json Error: " << jerr.errorString();
+            if (!dontshowagain) {
+                popup->showPopup("Σφάλμα!","Μη έγκυρη απάντηση από το διακομιστή.");
+                trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
+            }
+            dontshowagain = true;
+        }
     }
     else {
+        qDebug() << "Network Error: " << reply->errorString();
         if (!dontshowagain) {
             popup->showPopup("Σφάλμα!","Πρόβλημα σύνδεσης με το διακομιστή.");
             trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
@@ -120,6 +142,7 @@ void EPN_Dialog::getUpdate()
     }
     else
         networkManager->get(QNetworkRequest(QUrl(url)));
+    qDebug() << "Trying request from " << url;
 }
 
 void EPN_Dialog::saveSettings(void)

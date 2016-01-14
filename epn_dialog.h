@@ -55,8 +55,9 @@ private:
     bool dontshowagain;
     int lowPriorityMsg;
     QSystemTrayIcon *trayIcon;
-    QList<FileDownloader*> downloadList;
-    QJsonArray filelist;
+    //QList<FileDownloader*> downloadList;
+    //QJsonArray filelist;
+    FileDownloader fileDownloader;
 };
 
 #endif // EPN_DIALOG_H
