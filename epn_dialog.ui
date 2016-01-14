@@ -100,37 +100,5 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>okButton</sender>
-   <signal>released()</signal>
-   <receiver>EPN_Dialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>56</x>
-     <y>155</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>106</x>
-     <y>89</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cancelButton</sender>
-   <signal>released()</signal>
-   <receiver>EPN_Dialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>156</x>
-     <y>155</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>106</x>
-     <y>89</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
 </ui>

@@ -13,7 +13,8 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(this, SIGNAL(accepted()), this, SLOT(saveSettings()));
+    connect(ui->okButton, SIGNAL(released()), this, SLOT(saveSettings()));
+    connect(ui->cancelButton, SIGNAL(released()), this, SLOT(cancel()));
     setWindowTitle(QString("e-protocol notification v")+VERSION);
 
     // Create a tray icon
@@ -26,6 +27,8 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     exitAction = trayMenu->addAction("Έξοδος");
     connect(openAction, SIGNAL(triggered(bool)), this, SLOT(show()));
     connect(exitAction, SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason)));
 
     trayIcon->setContextMenu(trayMenu);
     trayIcon->show();
@@ -37,7 +40,7 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     popup = new Popup(this);
     settings = new QSettings("epn.ini", QSettings::IniFormat);
     username = settings->value("username").toString();
-    url = settings->value("url").toUrl();
+    url = settings->value("url", "").toUrl();
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(getUpdate()));
@@ -161,4 +164,16 @@ int EPN_Dialog::compareVersions(QString ver1, QString ver2)
             return 0;
         }
     }
+}
+
+void EPN_Dialog::cancel(void)
+{
+    ui->usernameEdit->setText(username);
+    hide();
+}
+
+void EPN_Dialog::iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason reason)
+{
+    if (reason == QSystemTrayIcon::DoubleClick)
+        show();
 }

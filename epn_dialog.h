@@ -34,7 +34,9 @@ public slots:
 private slots:
     void replyFinished(QNetworkReply*);
     void saveSettings(void);
+    void cancel(void);
     void quit(void);
+    void iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason);
 
 private:
     int compareVersions(QString, QString);
