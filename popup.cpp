@@ -42,7 +42,7 @@ void Popup::showPopup(QString title, QString description)
 void Popup::closePopup()
 {
     emit closed();
-    close();
+    hide();
 }
 
 void Popup::mousePressEvent(QMouseEvent*)
