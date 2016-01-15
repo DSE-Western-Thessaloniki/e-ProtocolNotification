@@ -33,13 +33,13 @@ void FileDownloader::getFiles(QVariantList filelist, QUrl baseUrl)
     if (!remainingRequests) { // Accept new list only when the previous is done
         int size = filelist.size();
         if ((size % 3) == 0) {
+            remainingRequests = size / 3;
             for (int i=0; i<size; i+=3) {
                 filenameList << filelist[0].toString();
                 hashList << filelist[1].toString();
                 hashTypeList << filelist[2].toInt();
                 urlList << QUrl(baseUrl.toString() + filelist[0].toString());
                 netManager.get(QNetworkRequest(QUrl(baseUrl.toString() + filelist[0].toString())));
-                remainingRequests++;
             }
         }
         else {
