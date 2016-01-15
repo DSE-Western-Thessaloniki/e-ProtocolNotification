@@ -73,11 +73,12 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
 {
     QJsonDocument jdoc;
     QJsonParseError jerr;
-    QJsonObject jobj;
+    QJsonObject jobj, joptobj;
     QJsonValue val;
 
     if (reply->error() == QNetworkReply::NoError) {
-        jdoc.fromJson(reply->readAll(), &jerr);
+        //qDebug() << reply->readAll();
+        jdoc = QJsonDocument::fromJson(reply->readAll(), &jerr);
         if (jerr.error == QJsonParseError::NoError) {
             dontshowagain = false;
             jobj = jdoc.object();
@@ -93,28 +94,35 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                 else
                     popup->showPopup("Message", val.toString());
             }
-            val = jobj.value("timeout");
-            timeout = val.toInt(30*60*1000); // Default: 30min
-            if (timeout > 60000) // Just in case...
-                timer->setInterval(timeout);
-            ui->minEdit->setText(QString::number(timeout));
-            url = jobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
-            settings->setValue("url",url);
-            val = jobj.value("version");
-            if (val != QJsonValue::Undefined) {
-                version = jobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
-                if (compareVersions(QString(VERSION),version)>0) {
-                    // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
-                    val = jobj.value("filelist");
-                    if (val != QJsonValue::Undefined) {
-                        fileDownloader.getFiles(jobj.value("filelist").toArray().toVariantList(), QUrl(url.toString() + QString("/download/")));
-                        //filelist = jobj.value("filelist").toArray();
-                        //for (int i=0; i<filelist.size(); i++) {
-                            //QJsonArray file = filelist[0].toArray();
-                            //downloadList << new FileDownloader(QUrl(url.toString() + QString("/download/") + file[0].toString()), file[1].toString(), file[2].toInt());
+            val = jobj.value("options");
+            if (val != QJsonValue::Undefined) { // Αν υπάρχουν ρυθμίσεις για το πρόγραμμα
+                joptobj = val.toObject();
+                val = joptobj.value("timeout");
+                timeout = val.toInt(30*60*1000); // Default: 30min
+                if (timeout > 60000) // Just in case...
+                    timer->setInterval(timeout);
+                ui->minEdit->setText(QString::number(timeout));
+                if (joptobj.value("url") != QJsonValue::Undefined) {
+                    url = joptobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
+                    settings->setValue("url",url.toString());
+                }
+                val = joptobj.value("version");
+                if (val != QJsonValue::Undefined) {
+                    version = joptobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
+                    if (compareVersions(QString(VERSION),version)>0) {
+                        // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
+                        val = joptobj.value("filelist");
+                        if (val != QJsonValue::Undefined) {
+                            fileDownloader.getFiles(joptobj.value("filelist").toArray().toVariantList(), QUrl(url.toString() + QString("/download/")));
+                            //filelist = jobj.value("filelist").toArray();
+                            //for (int i=0; i<filelist.size(); i++) {
+                                //QJsonArray file = filelist[0].toArray();
+                                //downloadList << new FileDownloader(QUrl(url.toString() + QString("/download/") + file[0].toString()), file[1].toString(), file[2].toInt());
+                        }
                     }
                 }
             }
+            trayIcon->setIcon(QIcon(":/icons/epn-icon.png"));
         }
         else {
             qDebug() << "Json Error: " << jerr.errorString();
@@ -133,22 +141,27 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         }
         dontshowagain = true;
     }
+    reply->deleteLater();
 }
 
 void EPN_Dialog::getUpdate()
 {
+    QUrl query;
+
+    query = QUrl(url.toString() + QString("?username=") + username);
     if (username.isEmpty()) {
         show();
     }
     else
-        networkManager->get(QNetworkRequest(QUrl(url)));
-    qDebug() << "Trying request from " << url;
+        networkManager->get(QNetworkRequest(query));
+    qDebug() << "Trying request from " << query.toString();
 }
 
 void EPN_Dialog::saveSettings(void)
 {
     username = ui->usernameEdit->text();
     settings->setValue("username", username);
+    getUpdate();
     hide();
 }
 
