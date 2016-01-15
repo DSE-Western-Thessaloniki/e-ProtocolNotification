@@ -86,13 +86,23 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
             // Έλεγχος τιμών
             val = jobj.value("message");
             if (val != QJsonValue::Undefined) { // Αν υπάρχει μήνυμα
-                if (jobj.value("priority").toString() == "low") { // low priority
-                    lowPriorityMsg = (lowPriorityMsg + 1) % 4;
-                    if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
-                        popup->showPopup("Message", val.toString());
+                if (jobj.value("priority").toString() == "high") { // high priority
+                    popup->setPriority(Popup::HighPriority);
+                    popup->showPopup("Ενημέρωση", val.toString());
                 }
-                else
-                    popup->showPopup("Message", val.toString());
+                else {
+                    if (jobj.value("priority").toString() == "normal") { // normal priority
+                        popup->setPriority(Popup::NormalPriority);
+                        if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
+                            popup->showPopup("Ενημέρωση", val.toString());
+                    }
+                    else {
+                        popup->setPriority(Popup::NoPriority);
+                        if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
+                            popup->showPopup("Ενημέρωση", val.toString());
+                    }
+                    lowPriorityMsg = (lowPriorityMsg + 1) % 4;
+                }
             }
             val = jobj.value("options");
             if (val != QJsonValue::Undefined) { // Αν υπάρχουν ρυθμίσεις για το πρόγραμμα
@@ -127,6 +137,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         else {
             qDebug() << "Json Error: " << jerr.errorString();
             if (!dontshowagain) {
+                popup->setPriority(Popup::Error);
                 popup->showPopup("Σφάλμα!","Μη έγκυρη απάντηση από το διακομιστή.");
                 trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
             }
@@ -136,6 +147,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
     else {
         qDebug() << "Network Error: " << reply->errorString();
         if (!dontshowagain) {
+            popup->setPriority(Popup::Error);
             popup->showPopup("Σφάλμα!","Πρόβλημα σύνδεσης με το διακομιστή.");
             trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
         }
