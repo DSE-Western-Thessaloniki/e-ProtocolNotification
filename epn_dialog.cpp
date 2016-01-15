@@ -60,7 +60,7 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
 
 EPN_Dialog::~EPN_Dialog()
 {
-    settings->setValue("url", url);
+    settings->setValue("url", url.toString());
     timer->stop();
 
     delete ui;
