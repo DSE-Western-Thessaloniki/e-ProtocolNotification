@@ -37,6 +37,7 @@ private slots:
     void cancel(void);
     void quit(void);
     void iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason);
+    void upgradeProgram(void);
 
 private:
     int compareVersions(QString, QString);

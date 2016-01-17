@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QJsonValue>
+#include <QProcess>
 
 #include "epn_dialog.h"
 #include "ui_epn_dialog.h"
@@ -47,6 +48,8 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     timer->start(120000);
     ui->minEdit->setText(QString::number(2));
     connect(timer, SIGNAL(timeout()), this, SLOT(getUpdate()));
+
+    connect(&fileDownloader, SIGNAL(hashChecked()), this, SLOT(upgradeProgram()));
 
     dontshowagain = false;
     lowPriorityMsg = 0;
@@ -124,10 +127,6 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                         val = joptobj.value("filelist");
                         if (val != QJsonValue::Undefined) {
                             fileDownloader.getFiles(joptobj.value("filelist").toArray().toVariantList(), QUrl(url.toString() + QString("/download/")));
-                            //filelist = jobj.value("filelist").toArray();
-                            //for (int i=0; i<filelist.size(); i++) {
-                                //QJsonArray file = filelist[0].toArray();
-                                //downloadList << new FileDownloader(QUrl(url.toString() + QString("/download/") + file[0].toString()), file[1].toString(), file[2].toInt());
                         }
                     }
                 }
@@ -224,4 +223,56 @@ void EPN_Dialog::iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason reaso
 {
     if (reason == QSystemTrayIcon::DoubleClick)
         show();
+}
+
+void EPN_Dialog::upgradeProgram()
+{
+    bool success = true;
+    if (fileDownloader.error() == FileDownloader::NoError) { // Files downloaded with no errors
+        QStringList files = fileDownloader.downloadedFiles();
+        QMap<int,QByteArray> data = fileDownloader.downloadedData();
+        for (int i=0; i<files.size(); i++) {
+            QFile f(files[i]+".new");
+            if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                if (f.write(data[i]) == -1) {
+                    success = false;
+                    qDebug() << "Error writing data to " << files[i];
+                }
+                f.close();
+            }
+            else {
+                qDebug() << "Failed opening " << files[i];
+                success = false;
+            }
+        }
+        if (success) { // All OK for now. Do the renaming
+            for (int i=0; i<files.size(); i++) {
+                if (QFile::exists(files[i])) {
+                    if (!QFile::rename(files[i],files[i]+".old")) {
+                        qDebug() << "Failed renaming " << files[i] << " to " << files[i] << ".old";
+                        success = false;
+                    }
+                }
+            }
+            if (success) {
+                for (int i=0; i<files.size(); i++) {
+                    if (!QFile::rename(files[i]+".new",files[i])) {
+                        qDebug() << "Failed renaming " << files[i] << ".new to " << files[i];
+                        success = false;
+                    }
+                }
+            }
+            else {
+                for (int i=0; i<files.size(); i++) {
+                    if (!QFile::rename(files[i]+".old",files[i])) {
+                        qDebug() << "Failed renaming " << files[i] << ".old to " << files[i];
+                        qDebug() << "Something went horribly wrong! :-(";
+                        success = false;
+                    }
+                }
+                if (QProcess::startDetached(files[0])) // Start new version and quit this one
+                    QCoreApplication::exit();
+            }
+        }
+    }
 }

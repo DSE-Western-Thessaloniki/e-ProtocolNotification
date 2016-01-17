@@ -86,3 +86,13 @@ void FileDownloader::checkHash()
     }
     emit hashChecked();
 }
+
+QStringList FileDownloader::downloadedFiles() const
+{
+    return filenameList;
+}
+
+FileDownloader::Error FileDownloader::error()
+{
+    return err;
+}

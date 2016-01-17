@@ -11,15 +11,16 @@
 class FileDownloader : public QObject
 {
  Q_OBJECT
- public:
+public:
+  enum Error {NoError, DownloadFailed, HashCheckFailed};
+
+public:
   explicit FileDownloader(QObject *parent = 0);
   virtual ~FileDownloader();
+  QStringList downloadedFiles(void) const;
   QMap<int, QByteArray> downloadedData(void) const;
   void getFiles(QVariantList filelist, QUrl baseUrl);
   Error error(void);
-
-public:
-  enum Error {NoError, DownloadFailed, HashCheckFailed};
 
  signals:
   void downloaded();
