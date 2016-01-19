@@ -4,6 +4,7 @@
 #include <QJsonParseError>
 #include <QJsonValue>
 #include <QProcess>
+#include <QDir>
 
 #include "epn_dialog.h"
 #include "ui_epn_dialog.h"
@@ -235,6 +236,16 @@ void EPN_Dialog::upgradeProgram()
         QStringList files = fileDownloader.downloadedFiles();
         QMap<int,QByteArray> data = fileDownloader.downloadedData();
         for (int i=0; i<files.size(); i++) {
+            QStringList path = files[i].split("/");
+            if (path.size() > 1) {
+                path.removeLast();
+                QString tmppath=path.join('/');
+                QDir dir;
+                if (dir.mkpath(tmppath)==false) { // We've got trouble...
+                    success = false;
+                    qDebug() << "Error creating dir path " << tmppath;
+                }
+            }
             QFile f(files[i]+".new");
             if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
                 if (f.write(data[i]) == -1) {
