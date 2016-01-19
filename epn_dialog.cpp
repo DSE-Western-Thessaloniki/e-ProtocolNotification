@@ -24,10 +24,12 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     QMenu *trayMenu = new QMenu();
 
     openAction = trayMenu->addAction("Ρυθμίσεις");
-    trayMenu->addSeparator();
-    exitAction = trayMenu->addAction("Έξοδος");
+    //trayMenu->addSeparator();
+    //exitAction = trayMenu->addAction("Έξοδος");
     connect(openAction, SIGNAL(triggered(bool)), this, SLOT(show()));
-    connect(exitAction, SIGNAL(triggered(bool)), this, SLOT(quit()));
+    //connect(exitAction, SIGNAL(triggered(bool)), this, SLOT(quit()));
+    shortcut = new QShortcut(QKeySequence("Ctrl+Q"),this);
+    connect(shortcut, SIGNAL(activated()), this, SLOT(quit()));
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason)));
 

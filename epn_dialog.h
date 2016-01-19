@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QResource>
 #include <QJsonArray>
+#include <QShortcut>
 #include "popup.h"
 #include "version.h"
 #include "filedownloader.h"
@@ -59,6 +60,7 @@ private:
     //QList<FileDownloader*> downloadList;
     //QJsonArray filelist;
     FileDownloader fileDownloader;
+    QShortcut *shortcut;
 };
 
 #endif // EPN_DIALOG_H
