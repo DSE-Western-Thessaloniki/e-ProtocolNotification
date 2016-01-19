@@ -10,6 +10,10 @@
     <height>179</height>
    </rect>
   </property>
+  <property name="windowIcon">
+   <iconset resource="epnresources.qrc">
+    <normaloff>:/icons/epn-icon.png</normaloff>:/icons/epn-icon.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
@@ -82,7 +86,9 @@
   <tabstop>okButton</tabstop>
   <tabstop>cancelButton</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="epnresources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>usernameEdit</sender>
