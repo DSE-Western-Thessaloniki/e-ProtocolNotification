@@ -177,6 +177,7 @@ void EPN_Dialog::saveSettings(void)
 }
 
 void EPN_Dialog::quit(void) {
+    trayIcon->hide();
     QApplication::quit();
 }
 
