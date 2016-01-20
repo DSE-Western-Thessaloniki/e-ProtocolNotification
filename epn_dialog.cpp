@@ -161,7 +161,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         }
         dontshowagain = true;
     }
-    //reply->deleteLater();
+    reply->deleteLater();
 }
 
 void EPN_Dialog::getUpdate()
