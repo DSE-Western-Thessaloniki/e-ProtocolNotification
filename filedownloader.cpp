@@ -22,7 +22,7 @@ void FileDownloader::fileDownloaded(QNetworkReply* reply) {
         qDebug() << "Download Error: " << reply->errorString();
         err = DownloadFailed;
     }
-    reply->deleteLater();
+    //reply->deleteLater();
     remainingRequests--;
     if (!remainingRequests)
         emit downloaded();

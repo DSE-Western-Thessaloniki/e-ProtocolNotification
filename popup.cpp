@@ -48,6 +48,8 @@ Popup::Popup(QWidget *parent) :
     ui->title->setStyleSheet(QString("QLabel {background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #E0E0E0, stop: 1 #000000);"
                                      "font: bold 12px;}"));
     ui->description->setStyleSheet(noPrioritySS);
+    connect(&timer, SIGNAL(timeout()), this, SLOT(closePopup()));
+    timer.setSingleShot(true);
 }
 
 Popup::~Popup()
@@ -67,6 +69,7 @@ void Popup::showPopup(QString title, QString description)
                     size(),
                     qApp->desktop()->availableGeometry()));
     show();
+    timer.start(5000);
 }
 
 void Popup::closePopup()

@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QDesktopWidget>
 #include <QMouseEvent>
+#include <QTimer>
 
 namespace Ui {
 class Popup;
@@ -34,6 +35,7 @@ signals:
 private:
     Ui::Popup *ui;
     QString noPrioritySS, normalPrioritySS, highPrioritySS, errorSS;
+    QTimer timer;
 };
 
 #endif // POPUP_H

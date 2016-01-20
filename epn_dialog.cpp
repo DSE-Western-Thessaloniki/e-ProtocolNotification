@@ -49,7 +49,7 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
     url = settings->value("url", "").toUrl();
 
     timer = new QTimer(this);
-    timer->start(120000);
+    timer->start(5*60*1000);
     ui->minEdit->setText(QString::number(2));
     connect(timer, SIGNAL(timeout()), this, SLOT(getUpdate()));
 
@@ -76,6 +76,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
     QJsonParseError jerr;
     QJsonObject jobj, joptobj;
     QJsonValue val;
+    bool silence;
 
     if (reply->error() == QNetworkReply::NoError) {
         //qDebug() << reply->readAll();
@@ -85,24 +86,31 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
             jobj = jdoc.object();
 
             // Έλεγχος τιμών
+            silence = jobj.value("silence").toBool();
             val = jobj.value("message");
-            if (val != QJsonValue::Undefined) { // Αν υπάρχει μήνυμα
-                if (jobj.value("priority").toString() == "high") { // high priority
-                    popup->setPriority(Popup::HighPriority);
-                    popup->showPopup("Ενημέρωση", val.toString());
-                }
-                else {
-                    if (jobj.value("priority").toString() == "normal") { // normal priority
-                        popup->setPriority(Popup::NormalPriority);
-                        if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
-                            popup->showPopup("Ενημέρωση", val.toString());
+            if (val != QJsonValue::Undefined && !silence) { // Αν υπάρχει μήνυμα
+                if (!jobj.value("error").toBool()) { // Server returns error message
+                    if (jobj.value("priority").toString() == "high") { // high priority
+                        popup->setPriority(Popup::HighPriority);
+                        popup->showPopup("e-protocol", val.toString());
                     }
                     else {
-                        popup->setPriority(Popup::NoPriority);
-                        if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
-                            popup->showPopup("Ενημέρωση", val.toString());
+                        if (jobj.value("priority").toString() == "normal") { // normal priority
+                            popup->setPriority(Popup::NormalPriority);
+                            if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
+                                popup->showPopup("e-protocol", val.toString());
+                        }
+                        else {
+                            popup->setPriority(Popup::NoPriority);
+                            if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
+                                popup->showPopup("e-protocol", val.toString());
+                        }
+                        lowPriorityMsg = (lowPriorityMsg + 1) % 6;
                     }
-                    lowPriorityMsg = (lowPriorityMsg + 1) % 6;
+                }
+                else {
+                    popup->setPriority(Popup::Error);
+                    popup->showPopup("e-protocol", val.toString());
                 }
             }
             val = jobj.value("options");
@@ -129,13 +137,16 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                     }
                 }
             }
-            trayIcon->setIcon(QIcon(":/icons/epn-icon.png"));
+            if (jobj.value("error").toBool())
+                trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
+            else
+                trayIcon->setIcon(QIcon(":/icons/epn-icon.png"));
         }
         else {
             qDebug() << "Json Error: " << jerr.errorString();
             if (!dontshowagain) {
                 popup->setPriority(Popup::Error);
-                popup->showPopup("Σφάλμα!","Μη έγκυρη απάντηση από το διακομιστή.");
+                popup->showPopup("e-protocol","Σφάλμα! Μη έγκυρη απάντηση από το διακομιστή.");
                 trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
             }
             dontshowagain = true;
@@ -145,12 +156,12 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         qDebug() << "Network Error: " << reply->errorString();
         if (!dontshowagain) {
             popup->setPriority(Popup::Error);
-            popup->showPopup("Σφάλμα!","Πρόβλημα σύνδεσης με το διακομιστή.");
+            popup->showPopup("e-protocol","Σφάλμα! Πρόβλημα σύνδεσης με το διακομιστή.");
             trayIcon->setIcon(QIcon(":/icons/epn-icon-error.png"));
         }
         dontshowagain = true;
     }
-    reply->deleteLater();
+    //reply->deleteLater();
 }
 
 void EPN_Dialog::getUpdate()
@@ -280,7 +291,7 @@ void EPN_Dialog::upgradeProgram()
                     }
                 }
                 if (QProcess::startDetached(files[0])) // Start new version and quit this one
-                    QCoreApplication::exit();
+                    quit();
             }
         }
     }
