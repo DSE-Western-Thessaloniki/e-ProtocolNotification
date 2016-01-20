@@ -5,6 +5,7 @@
 #include <QJsonValue>
 #include <QProcess>
 #include <QDir>
+#include <QDebug>
 
 #include "epn_dialog.h"
 #include "ui_epn_dialog.h"
@@ -56,12 +57,6 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
 
     dontshowagain = false;
     lowPriorityMsg = 0;
-
-    qDebug() << "Support SSL:  " << QSslSocket::supportsSsl()
-            << "\nLib Version Number: " << QSslSocket::sslLibraryVersionNumber()
-            << "\nLib Version String: " << QSslSocket::sslLibraryVersionString()
-            << "\nLib Build Version Number: " << QSslSocket::sslLibraryBuildVersionNumber()
-            << "\nLib Build Version String: " << QSslSocket::sslLibraryBuildVersionString();
 }
 
 EPN_Dialog::~EPN_Dialog()
@@ -107,7 +102,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                         if (!lowPriorityMsg) // Show low priority messages only 1/4 of the time (when value is 0)
                             popup->showPopup("Ενημέρωση", val.toString());
                     }
-                    lowPriorityMsg = (lowPriorityMsg + 1) % 4;
+                    lowPriorityMsg = (lowPriorityMsg + 1) % 6;
                 }
             }
             val = jobj.value("options");
@@ -117,7 +112,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                 timeout = val.toInt(30*60*1000); // Default: 30min
                 if (timeout > 60000) // Just in case...
                     timer->setInterval(timeout);
-                ui->minEdit->setText(QString::number(timeout));
+                ui->minEdit->setText(QString::number(timeout/60000));
                 if (joptobj.value("url") != QJsonValue::Undefined) {
                     url = joptobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
                     settings->setValue("url",url.toString());
