@@ -50,6 +50,7 @@ Popup::Popup(QWidget *parent) :
     ui->description->setStyleSheet(noPrioritySS);
     connect(&timer, SIGNAL(timeout()), this, SLOT(closePopup()));
     timer.setSingleShot(true);
+    timeout = 10000; // 10sec timeout
 }
 
 Popup::~Popup()
@@ -69,7 +70,7 @@ void Popup::showPopup(QString title, QString description)
                     size(),
                     qApp->desktop()->availableGeometry()));
     show();
-    timer.start(5000);
+    timer.start(timeout);
 }
 
 void Popup::closePopup()
@@ -93,4 +94,9 @@ void Popup::setPriority(int priority)
         ui->description->setStyleSheet(normalPrioritySS);
     else // Popup::NoPriority
         ui->description->setStyleSheet(noPrioritySS);
+}
+
+void Popup::setTimeout(int time)
+{
+    timeout = time;
 }

@@ -121,6 +121,8 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                 if (timeout > 60000) // Just in case...
                     timer->setInterval(timeout);
                 ui->minEdit->setText(QString::number(timeout/60000));
+                val = joptobj.value("popuptimeout");
+                popup->setTimeout((val.toInt()<2000)?10000:val.toInt());
                 if (joptobj.value("url") != QJsonValue::Undefined) {
                     url = joptobj.value("url").toString(); // Δες αν υπάρχει νέα ρύθμιση για το url
                     settings->setValue("url",url.toString());

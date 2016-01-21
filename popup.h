@@ -21,6 +21,7 @@ public:
     void showPopup(QString title, QString description);
     void mousePressEvent(QMouseEvent*);
     void setPriority(int);
+    void setTimeout(int);
 
 public:
     enum Priority {NoPriority, NormalPriority, HighPriority, Error};
@@ -36,6 +37,7 @@ private:
     Ui::Popup *ui;
     QString noPrioritySS, normalPrioritySS, highPrioritySS, errorSS;
     QTimer timer;
+    int timeout;
 };
 
 #endif // POPUP_H
