@@ -1,5 +1,8 @@
 #include <QDebug>
 #include "filedownloader.h"
+#include "logger.h"
+
+extern Logger logger;
 
 FileDownloader::FileDownloader(QObject *parent) :
  QObject(parent)
@@ -20,8 +23,11 @@ void FileDownloader::fileDownloaded(QNetworkReply* reply) {
     else {
         qDebug() << "Error Downloading " << reply->request().url();
         qDebug() << "Download Error: " << reply->errorString();
+        logger.write(QString("Error Downloading ") + reply->request().url());
+        logger.write(QString("Download Error: ") + reply->errorString());
         err = DownloadFailed;
     }
+    reply->close();
     reply->deleteLater();
     remainingRequests--;
     if (!remainingRequests)
@@ -63,9 +69,11 @@ void FileDownloader::getFiles(QVariantList filelist, QUrl baseUrl)
         }
         else {
             qDebug() << "Download error: Invalid file list.";
+            logger.write(QString("Download error: Invalid file list."));
         }
     }
     qDebug() << "Download error: Downloads still pending. Not queuing.";
+    logger.write(QString("Download error: Downloads still pending. Not queuing."));
 }
 
 void FileDownloader::checkHash()

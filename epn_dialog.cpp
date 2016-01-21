@@ -9,6 +9,9 @@
 
 #include "epn_dialog.h"
 #include "ui_epn_dialog.h"
+#include "logger.h"
+
+extern Logger logger;
 
 EPN_Dialog::EPN_Dialog(QWidget *parent) :
     QDialog(parent),
@@ -146,6 +149,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
         }
         else {
             qDebug() << "Json Error: " << jerr.errorString();
+            logger.write(QString("Json Error: ") + jerr.errorString());
             if (!dontshowagain) {
                 popup->setPriority(Popup::Error);
                 popup->showPopup("e-protocol","Σφάλμα! Μη έγκυρη απάντηση από το διακομιστή.");
@@ -156,6 +160,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
     }
     else {
         qDebug() << "Network Error: " << reply->errorString();
+        logger.write(QString("Network Error: ") + reply->errorString());
         if (!dontshowagain) {
             popup->setPriority(Popup::Error);
             popup->showPopup("e-protocol","Σφάλμα! Πρόβλημα σύνδεσης με το διακομιστή.");
@@ -177,6 +182,7 @@ void EPN_Dialog::getUpdate()
     else
         networkManager->get(QNetworkRequest(query));
     qDebug() << "Trying request from " << query.toString();
+    logger.write(QString("Trying request from ") + query.toString());
 }
 
 void EPN_Dialog::saveSettings(void)
@@ -252,6 +258,7 @@ void EPN_Dialog::upgradeProgram()
                 if (dir.mkpath(tmppath)==false) { // We've got trouble...
                     success = false;
                     qDebug() << "Error creating dir path " << tmppath;
+                    logger.write(QString("Error creating dir path ") + tmppath);
                 }
             }
             QFile f(files[i]+".new");
@@ -259,11 +266,13 @@ void EPN_Dialog::upgradeProgram()
                 if (f.write(data[i]) == -1) {
                     success = false;
                     qDebug() << "Error writing data to " << files[i];
+                    logger.write(QString("Error writing data to ") + files[i]);
                 }
                 f.close();
             }
             else {
                 qDebug() << "Failed opening " << files[i];
+                logger.write(QString("Failed opening ") + files[i]);
                 success = false;
             }
         }
@@ -272,6 +281,7 @@ void EPN_Dialog::upgradeProgram()
                 if (QFile::exists(files[i])) {
                     if (!QFile::rename(files[i],files[i]+".old")) {
                         qDebug() << "Failed renaming " << files[i] << " to " << files[i] << ".old";
+                        logger.write(QString("Failed renaming ") + files[i] + " to " + files[i] + ".old");
                         success = false;
                     }
                 }
@@ -280,6 +290,7 @@ void EPN_Dialog::upgradeProgram()
                 for (int i=0; i<files.size(); i++) {
                     if (!QFile::rename(files[i]+".new",files[i])) {
                         qDebug() << "Failed renaming " << files[i] << ".new to " << files[i];
+                        logger.write(QString("Failed renaming ") + files[i] + ".new to " + files[i]);
                         success = false;
                     }
                 }
@@ -289,6 +300,8 @@ void EPN_Dialog::upgradeProgram()
                     if (!QFile::rename(files[i]+".old",files[i])) {
                         qDebug() << "Failed renaming " << files[i] << ".old to " << files[i];
                         qDebug() << "Something went horribly wrong! :-(";
+                        logger.write(QString("Failed renaming ") + files[i] + ".old to " + files[i]);
+                        logger.write(QString("Something went horribly wrong! :-("));
                         success = false;
                     }
                 }
