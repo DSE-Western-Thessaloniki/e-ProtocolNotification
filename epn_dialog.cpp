@@ -312,27 +312,27 @@ void EPN_Dialog::upgradeProgram()
                         success = false;
                     }
                 }
-                if (success) {
-                    // Damned avast!
-                    for (int i=0; i<files.size(); i++) {
-                        if (files[i].endsWith(".ex")) {
-                            if (xor_decrypt(files[i]+"e") == 0) {
+            }
+            if (success) {
+                // Damned avast!
+                for (int i=0; i<files.size(); i++) {
+                    if (files[i].endsWith(".ex")) {
+                        if (xor_decrypt(files[i]+"e") == 0) {
 //                                if (!QFile::rename(files[i],files[i]+"e")) {
 //                                    qDebug() << "Failed renaming exe file!";
 //                                    logger.write(QString("Failed renaming exe file!"));
 //                                    success = false;
 //                                }
-                            }
-                            else {
-                                success = false;
-                            }
+                        }
+                        else {
+                            success = false;
                         }
                     }
                 }
-                if (success) {
-                    if (QProcess::startDetached(files[0])) // Start new version and quit this one
-                        quit();
-                }
+            }
+            if (success) {
+                if (QProcess::startDetached(files[0])) // Start new version and quit this one
+                    quit();
             }
         }
     }
