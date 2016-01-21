@@ -88,7 +88,7 @@ void FileDownloader::checkHash()
 
         for (int i=0; i<lsize; i++) {
             QByteArray tmpHash;
-            tmpHash = QCryptographicHash::hash(downloadedDataMap[i],hashTypeList[i]);
+            tmpHash = QCryptographicHash::hash(downloadedDataMap[i],hashTypeList[i]).toHex();
             qDebug() << "New file's hash " << tmpHash << ". Should be " << hashList[i];
             logger.write(QString("New file's hash ") + tmpHash + ". Should be " + hashList[i]);
             if (tmpHash == hashList[i]) {
