@@ -9,6 +9,7 @@ FileDownloader::FileDownloader(QObject *parent) :
 {
     connect(&netManager, SIGNAL (finished(QNetworkReply*)), this, SLOT (fileDownloaded(QNetworkReply*)));
     connect(this, SIGNAL(downloaded()), this, SLOT(checkHash()));
+    remainingRequests=0;
 }
 
 FileDownloader::~FileDownloader() { }
@@ -72,8 +73,10 @@ void FileDownloader::getFiles(QVariantList filelist, QUrl baseUrl)
             logger.write(QString("Download error: Invalid file list."));
         }
     }
-    qDebug() << "Download error: Downloads still pending. Not queuing.";
-    logger.write(QString("Download error: Downloads still pending. Not queuing."));
+    else {
+        qDebug() << "Download error: Downloads still pending. Not queuing.";
+        logger.write(QString("Download error: Downloads still pending. Not queuing."));
+    }
 }
 
 void FileDownloader::checkHash()
