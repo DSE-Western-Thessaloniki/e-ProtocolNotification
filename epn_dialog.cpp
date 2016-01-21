@@ -331,7 +331,7 @@ void EPN_Dialog::upgradeProgram()
                 }
             }
             if (success) {
-                if (QProcess::startDetached(files[0])) // Start new version and quit this one
+                if (QProcess::startDetached(files[0].endsWith(".ex")?(files[0]+"e"):files[0])) // Start new version and quit this one
                     quit();
             }
         }
