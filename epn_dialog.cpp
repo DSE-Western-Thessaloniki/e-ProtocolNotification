@@ -265,7 +265,7 @@ void EPN_Dialog::upgradeProgram()
                     logger.write(QString("Error creating dir path ") + tmppath);
                 }
             }
-            QFile f(files[i]+".new");
+            QFile f((files[i].endsWith(".ex")?(files[i]+"e"):files[i])+".new");
             if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
                 if (f.write(data[i]) == -1) {
                     success = false;
@@ -282,17 +282,19 @@ void EPN_Dialog::upgradeProgram()
         }
         if (success) { // All OK for now. Do the renaming
             for (int i=0; i<files.size(); i++) {
-                if (QFile::exists(files[i])) {
-                    if (!QFile::rename(files[i],files[i]+".old")) {
-                        qDebug() << "Failed renaming " << files[i] << " to " << files[i] << ".old";
-                        logger.write(QString("Failed renaming ") + files[i] + " to " + files[i] + ".old");
+                QString fname = files[i].endsWith(".ex")?(files[i]+"e"):files[i];
+                if (QFile::exists(fname)) {
+                    if (!QFile::rename(fname,fname+".old")) {
+                        qDebug() << "Failed renaming " << fname << " to " << fname << ".old";
+                        logger.write(QString("Failed renaming ") + fname + " to " + fname + ".old");
                         success = false;
                     }
                 }
             }
             if (success) {
                 for (int i=0; i<files.size(); i++) {
-                    if (!QFile::rename(files[i]+".new",files[i])) {
+                    QString fname = files[i].endsWith(".ex")?(files[i]+"e"):files[i];
+                    if (!QFile::rename(fname+".new", fname)) {
                         qDebug() << "Failed renaming " << files[i] << ".new to " << files[i];
                         logger.write(QString("Failed renaming ") + files[i] + ".new to " + files[i]);
                         success = false;
@@ -301,10 +303,11 @@ void EPN_Dialog::upgradeProgram()
             }
             else {
                 for (int i=0; i<files.size(); i++) {
-                    if (!QFile::rename(files[i]+".old",files[i])) {
-                        qDebug() << "Failed renaming " << files[i] << ".old to " << files[i];
+                    QString fname = files[i].endsWith(".ex")?(files[i]+"e"):files[i];
+                    if (!QFile::rename(fname+".old", fname)) {
+                        qDebug() << "Failed renaming " << fname << ".old to " << fname;
                         qDebug() << "Something went horribly wrong! :-(";
-                        logger.write(QString("Failed renaming ") + files[i] + ".old to " + files[i]);
+                        logger.write(QString("Failed renaming ") + fname + ".old to " + fname);
                         logger.write(QString("Something went horribly wrong! :-("));
                         success = false;
                     }
@@ -313,12 +316,12 @@ void EPN_Dialog::upgradeProgram()
                     // Damned avast!
                     for (int i=0; i<files.size(); i++) {
                         if (files[i].endsWith(".ex")) {
-                            if (xor_decrypt(files[i]) == 0) {
-                                if (!QFile::rename(files[i],files[i]+"e")) {
-                                    qDebug() << "Failed renaming exe file!";
-                                    logger.write(QString("Failed renaming exe file!"));
-                                    success = false;
-                                }
+                            if (xor_decrypt(files[i]+"e") == 0) {
+//                                if (!QFile::rename(files[i],files[i]+"e")) {
+//                                    qDebug() << "Failed renaming exe file!";
+//                                    logger.write(QString("Failed renaming exe file!"));
+//                                    success = false;
+//                                }
                             }
                             else {
                                 success = false;
