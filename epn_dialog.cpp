@@ -305,9 +305,59 @@ void EPN_Dialog::upgradeProgram()
                         success = false;
                     }
                 }
-                if (QProcess::startDetached(files[0])) // Start new version and quit this one
-                    quit();
+                if (success) {
+                    // Damned avast!
+                    for (int i=0; i<files.size(); i++) {
+                        if (files[i].endsWith(".ex")) {
+                            if (xor_decrypt(files[i]) == 0) {
+                                if (!QFile::rename(files[i],files[i]+"e")) {
+                                    qDebug() << "Failed renaming exe file!";
+                                    logger.write(QString("Failed renaming exe file!"));
+                                    success = false;
+                                }
+                            }
+                            else {
+                                success = false;
+                            }
+                        }
+                    }
+                }
+                if (success) {
+                    if (QProcess::startDetached(files[0])) // Start new version and quit this one
+                        quit();
+                }
             }
         }
     }
+}
+
+int EPN_Dialog::xor_decrypt(QString filename)
+{
+    QByteArray buffer;
+    QFile file(filename);
+
+    if (!file.open(QIODevice::ReadWrite)) {
+        qDebug() << "Error opening " << filename << " rw";
+        logger.write(QString("Error opening " + filename + " rw"));
+        return 1;
+    }
+    buffer = file.readAll();
+    if (file.error() != QFile::NoError) {
+        qDebug() << file.errorString();
+        logger.write(file.errorString());
+        file.close();
+        return 1;
+    }
+    for (int i=0; i<buffer.size(); i++) {
+        buffer[i] = buffer[i] ^ 158;
+    }
+    if (file.write(buffer) == -1) {
+        qDebug() << file.errorString();
+        logger.write(file.errorString());
+        file.close();
+        return 1;
+    }
+    file.close();
+
+    return 0;
 }

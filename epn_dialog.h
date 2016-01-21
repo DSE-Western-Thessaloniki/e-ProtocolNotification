@@ -42,6 +42,7 @@ private slots:
 
 private:
     int compareVersions(QString, QString);
+    int xor_decrypt(QString);
 
 private:
     Ui::EPN_Dialog *ui;
