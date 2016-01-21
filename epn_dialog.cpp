@@ -121,7 +121,7 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                 joptobj = val.toObject();
                 val = joptobj.value("timeout");
                 timeout = val.toInt(30*60*1000); // Default: 30min
-                if (timeout > 60000) // Just in case...
+                if (timeout >= 60000) // Just in case...
                     timer->setInterval(timeout);
                 ui->minEdit->setText(QString::number(timeout/60000));
                 val = joptobj.value("popuptimeout");

@@ -16,7 +16,7 @@ void Logger::write(const QString &value) {
     QTextStream out(file);
     out.setCodec("UTF-8");
     if (file != 0) {
-        out << text;
+        out << text << '\n' << flush;
     }
 }
 
