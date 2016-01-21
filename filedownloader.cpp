@@ -23,7 +23,7 @@ void FileDownloader::fileDownloaded(QNetworkReply* reply) {
     else {
         qDebug() << "Error Downloading " << reply->request().url();
         qDebug() << "Download Error: " << reply->errorString();
-        logger.write(QString("Error Downloading ") + reply->request().url());
+        logger.write(QString("Error Downloading ") + reply->request().url().toString());
         logger.write(QString("Download Error: ") + reply->errorString());
         err = DownloadFailed;
     }
