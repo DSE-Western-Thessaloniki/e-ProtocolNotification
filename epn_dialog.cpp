@@ -135,6 +135,8 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                     version = joptobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
                     if (compareVersions(QString(VERSION),version)>0) {
                         // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
+                        qDebug() << "The is a new version available! (" << version << ")";
+                        logger.write(QString("The is a new version available! (") + version + ")");
                         val = joptobj.value("filelist");
                         if (val != QJsonValue::Undefined) {
                             fileDownloader.getFiles(joptobj.value("filelist").toArray().toVariantList(), QUrl(url.toString() + QString("/download/")));
@@ -245,6 +247,8 @@ void EPN_Dialog::iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason reaso
 
 void EPN_Dialog::upgradeProgram()
 {
+    qDebug() << "Upgrading program...";
+    logger.write(QString("Upgrading program..."));
     bool success = true;
     if (fileDownloader.error() == FileDownloader::NoError) { // Files downloaded with no errors
         QStringList files = fileDownloader.downloadedFiles();
@@ -328,6 +332,10 @@ void EPN_Dialog::upgradeProgram()
                 }
             }
         }
+    }
+    else {
+        qDebug() << "Downloader returned errno:" << fileDownloader.error() << ". Aborting...";
+        logger.write(QString("Downloader returned errno:") + fileDownloader.error() + ". Aborting...");
     }
 }
 

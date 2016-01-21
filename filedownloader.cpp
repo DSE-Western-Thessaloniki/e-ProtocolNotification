@@ -66,6 +66,8 @@ void FileDownloader::getFiles(QVariantList filelist, QUrl baseUrl)
                 }
                 urlList << QUrl(baseUrl.toString() + filelist[0].toString());
                 netManager.get(QNetworkRequest(QUrl(baseUrl.toString() + filelist[0].toString())));
+                qDebug() << "Downloading " << baseUrl.toString() << filelist[0].toString();
+                logger.write(QString("Downloading ") + baseUrl.toString() + filelist[0].toString());
             }
         }
         else {
