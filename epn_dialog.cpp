@@ -362,6 +362,7 @@ int EPN_Dialog::xor_decrypt(QString filename)
     for (int i=0; i<buffer.size(); i++) {
         buffer[i] = buffer[i] ^ 158;
     }
+    file.seek(0);
     if (file.write(buffer) == -1) {
         qDebug() << file.errorString();
         logger.write(file.errorString());
