@@ -133,7 +133,8 @@ void EPN_Dialog::replyFinished(QNetworkReply *reply)
                 val = joptobj.value("version");
                 if (val != QJsonValue::Undefined) {
                     version = joptobj.value("version").toString(); // Διάβασε την τελευταία έκδοση του προγράμματος
-                    if (compareVersions(QString(VERSION),version)>0) {
+                    if ((joptobj.value("forceupgrade").toBool() && compareVersions(QString(VERSION),version)!=0) ||
+                            (compareVersions(QString(VERSION),version)>0)) {
                         // Υπάρχει νέα έκδοση του προγράμματος. Κατέβασέ το!
                         qDebug() << "The is a new version available! (" << version << ")";
                         logger.write(QString("The is a new version available! (") + version + ")");
