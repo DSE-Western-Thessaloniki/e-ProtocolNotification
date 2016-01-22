@@ -284,6 +284,8 @@ void EPN_Dialog::upgradeProgram()
             for (int i=0; i<files.size(); i++) {
                 QString fname = files[i].endsWith(".ex")?(files[i]+"e"):files[i];
                 if (QFile::exists(fname)) {
+                    if (QFile::exists(fname+".old"))
+                        QFile::remove(fname+".old");
                     if (!QFile::rename(fname,fname+".old")) {
                         qDebug() << "Failed renaming " << fname << " to " << fname << ".old";
                         logger.write(QString("Failed renaming ") + fname + " to " + fname + ".old");
