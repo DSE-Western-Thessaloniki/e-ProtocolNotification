@@ -21,7 +21,7 @@ EPN_Dialog::EPN_Dialog(QWidget *parent) :
 
     connect(ui->okButton, SIGNAL(released()), this, SLOT(saveSettings()));
     connect(ui->cancelButton, SIGNAL(released()), this, SLOT(cancel()));
-    setWindowTitle(QString("e-protocol notification v")+VERSION);
+    setWindowTitle(QString("e-pn v")+VERSION);
 
     // Create a tray icon
     trayIcon = new QSystemTrayIcon(QIcon(":/icons/epn-icon.png"));
@@ -243,8 +243,11 @@ void EPN_Dialog::cancel(void)
 
 void EPN_Dialog::iconCheckForDoubleClick(QSystemTrayIcon::ActivationReason reason)
 {
-    if (reason == QSystemTrayIcon::DoubleClick)
+    if (reason == QSystemTrayIcon::DoubleClick) {
         show();
+        raise();
+        activateWindow();
+    }
 }
 
 void EPN_Dialog::upgradeProgram()

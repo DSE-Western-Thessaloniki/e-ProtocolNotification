@@ -2,7 +2,7 @@
 #define VERSION_H
 
 // Watch out! Use only numbers and keep the format x.y.z
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 
 #endif // VERSION_H
 
