@@ -190,6 +190,7 @@ void EPN_Dialog::getUpdate()
 
 void EPN_Dialog::saveSettings(void)
 {
+    dontshowagain = false;
     username = ui->usernameEdit->text();
     settings->setValue("username", username);
     getUpdate();
